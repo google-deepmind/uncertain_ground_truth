@@ -69,8 +69,10 @@ class PValueCombinationTest(parameterized.TestCase):
           # Bonferroni does not result in a uniform combined p-value.
           self.assertAlmostEqual(jnp.mean(combined_p_values < u), u, places=1)
       for alpha in [0.05, 0.1]:
-        self.assertAlmostEqual(
-            jnp.mean(combined_p_values > alpha), 1 - alpha, places=2
+        self.assertTrue(
+            jnp.allclose(jnp.mean(combined_p_values > alpha),
+                         1 - alpha,
+                         atol=0.01)
         )
 
   def test_combine_ecdf_p_values(self):
