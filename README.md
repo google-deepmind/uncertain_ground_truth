@@ -2,9 +2,10 @@
 
 This repository contains code for our papers on calibrating [1] and evaluating [2] AI models with uncertain and ambiguous ground truth.
 
-Currently, the code allows to reproduce our results on the toy dataset
-presented in [1]. *Results on the dermatology case study of [2] will
-follow soon.*
+The code allows to reproduce our results on both the dermatology dataset
+and the toy dataset presented in [1]. As such, this repository also
+open-sources this "dermatology ddx dataset", i.e., the expert annotations,
+as a benchmark for future work.
 
 ```
 [1] Stutz, D., Roy, A.G., Matejovicova, T., Strachan, P., Cemgil, A.T.,
@@ -82,6 +83,39 @@ Python binary should be first in `PATH`. If that is not the case (e.g.,
 `PATH` lists a local Python installation in `~/.local/` first), this can
 cause problems.
 
+## Datasets
+
+![Dermatology ddx dataset](https://davidstutz.de/wordpress/wp-content/uploads/2024/02/teaser-dermatology-ddx-dataset.jpg)
+
+The dermatology differential diagnoses (ddx) dataset for skin condition
+classification used in [1, 2] includes expert annotations and model
+predictions for 1947 cases. Note that no images or meta information are
+provided. The data is split across the following files:
+
+*  `data/dermatology_selectors.json`: The expert annotations as partial
+   rankings. These partial rankings are encoded as so-called "selectors":
+   For each case, there are multiple partial rankings, each partial
+   ranking is a list of grouped classes (i.e., skin conditions).
+   Teh example from [1, 2] shown below describes a partial ranking where
+   "Hemangioma" is ranked first followed by a group of three conditions,
+   including "Melanocytic Nevus", "Melanoma", and "O/E". In the JSON file,
+   the conditions are encoded as numbers and the mapping of numbers to
+   condition names can be found in `data/dermatology_conditions.txt`.
+
+```
+['Hemangioma'], ['Melanocytic Nevus', 'Melanoma', 'O/E']
+```
+
+*  `data/dermatology_predictions[0-4].json`: Model predictions of models
+   A to D in [1] as `1947 x 419` float arrays saved using `numpy.savetxt` with
+   `fmt='%.3e'`.
+*  `data/dermatology_conditions.txt`: Condition names for each class.
+*  `data/dermatology_risks.txt`: Risk category for each condition, where
+   0 corresponds to low risk, 1 to medium risk and 2 to high risk.
+
+The toy dataset used in [1] is not provided in `data/` but can be generated
+using `colab_toy_data.upynb` as described below.
+
 ## Usage
 
 All of this repository's components can be used in a standalone fashion.
@@ -98,12 +132,21 @@ partial average overlap (`ranking_metrics.py`) and general top-k
 This will likely be most interesting regarding the (smooth) conformal prediction
 Finally, the toy example from [1] can be found in `gaussian_toy_dataset.py`.
 
+All experiments of [1] and [2] can be reproduced on either the toy dataset
+introduced in [1] or the dermatology ddx dataset. For preparing the data,
+run either `colab_toy_data.ipynb` or `colab_derm_data.ipynb`. The former
+generates a toy dataset; the latter reads the dermatology ddx dataset from
+`data/` and pre-processes it for experiments. The other Colabs will include
+a `dataset` variable to indicate which dataset to run the experiments on.
+
 ### Reproducing experiments from [1]
 
 1. Start by running `colab_toy_data.ipynb` to create the toy dataset
    used for illustrations throughout [1]. The Colab will visualize the dataset,
    save it to a `.pkl` file and train a few small MLPs on the dataset.
-2. Run `colab_toy_mccp` to re-create many of the plots from Sections 2 and 3.
+2. Run `colab_mccp` on the toy dataset to re-create many of the plots from
+   Sections 2 and 3 and on the dermatology ddx dataset to re-create the main
+   results from Section 4.1.
    The Colab includes examples of running standard conformal prediction against
    voted labels, Monte Carlo conformal prediction against plausibilities
    (with and without ECDF correction), and plausibility regions against
@@ -113,14 +156,14 @@ Finally, the toy example from [1] can be found in `gaussian_toy_dataset.py`.
 
 ### Reproducing experiments from [2]
 
-1. Start by running `colab_toy_data.ipynb` to create the toy dataset from [1].
-   This will also sample multiple annotations as (partial) rankings per example.
-2. Run `colab_toy_pl_sampler.ipynb` to run the Plackett-Luce Gibbs sampler on
-   the sampled annotations from 1.
-3. Run `colab_toy_ua_accuracy.ipynb` to re-create figures from [2] on the toy
-   dataset using probabilistic IRN plausibilities. After step 2, this can be
-   changed to use Plackett-Luce plausibilities instead.
-4. Run `colab_partial_ao.ipynb` for an example of how to use the partial average
+1. Run `colab_pl_sampler.ipynb` to run the Plackett-Luce Gibbs sampler on
+   synthetic annotations on the toy dataset or the real annotations on the
+   dermatology ddx dataset.
+2. Run `colab_ua_accuracy.ipynb` to re-create figures from [2]
+   using probabilistic IRN plausibilities. For running this on the Plackett-Luce plausibilities, step 1 needs to be repeated for different values of
+   `reader_repetitions` on the whole dataset. This can be computationally
+   involved and we recommend not to do this in the Colab.
+3. Run `colab_partial_ao.ipynb` for an example of how to use the partial average
    overlap algorithm from [2].
 
 ## Citing this work
@@ -150,19 +193,10 @@ When using any part of this repository, make sure to cite both papers as follows
 
 Copyright 2023 DeepMind Technologies Limited
 
-All software is licensed under the Apache License, Version 2.0 (Apache 2.0);
-you may not use this file except in compliance with the Apache 2.0 license.
-You may obtain a copy of the Apache 2.0 license at:
-https://www.apache.org/licenses/LICENSE-2.0
+All software is licensed under the Apache License, Version 2.0 (Apache 2.0); you may not use this file except in compliance with the Apache 2.0 license. You may obtain a copy of the Apache 2.0 license at: https://www.apache.org/licenses/LICENSE-2.0
 
-All other materials are licensed under the Creative Commons Attribution 4.0
-International License (CC-BY). You may obtain a copy of the CC-BY license at:
-https://creativecommons.org/licenses/by/4.0/legalcode
+All other materials, the provided model predictions and annotations specifically, are licensed under the Creative Commons Attribution 4.0 International License (CC-BY). You may obtain a copy of the CC-BY license at: https://creativecommons.org/licenses/by/4.0/legalcode
 
-Unless required by applicable law or agreed to in writing, all software and
-materials distributed here under the Apache 2.0 or CC-BY licenses are
-distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
-either express or implied. See the licenses for the specific language governing
-permissions and limitations under those licenses.
+Unless required by applicable law or agreed to in writing, all software and materials distributed here under the Apache 2.0 or CC-BY licenses are distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the licenses for the specific language governing permissions and limitations under those licenses.
 
 This is not an official Google product.
