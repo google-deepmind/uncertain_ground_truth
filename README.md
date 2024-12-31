@@ -96,7 +96,7 @@ provided. The data is split across the following files:
    rankings. These partial rankings are encoded as so-called "selectors":
    For each case, there are multiple partial rankings, each partial
    ranking is a list of grouped classes (i.e., skin conditions).
-   Teh example from [1, 2] shown below describes a partial ranking where
+   The example from [1, 2] shown below describes a partial ranking where
    "Hemangioma" is ranked first followed by a group of three conditions,
    including "Melanocytic Nevus", "Melanoma", and "O/E". In the JSON file,
    the conditions are encoded as numbers and the mapping of numbers to
